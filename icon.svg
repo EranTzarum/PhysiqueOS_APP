@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#1a1d27"/>
+  <!-- Plate circle -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#2e3352" stroke-width="12"/>
+  <!-- Fork left -->
+  <rect x="148" y="160" width="8" height="80" rx="4" fill="#4f8aff"/>
+  <rect x="136" y="160" width="8" height="50" rx="4" fill="#4f8aff"/>
+  <rect x="160" y="160" width="8" height="50" rx="4" fill="#4f8aff"/>
+  <rect x="136" y="208" width="32" height="8" rx="4" fill="#4f8aff"/>
+  <rect x="148" y="216" width="8" height="80" rx="4" fill="#4f8aff"/>
+  <!-- Protein bar (blue) -->
+  <rect x="192" y="224" width="128" height="20" rx="10" fill="#2e3352"/>
+  <rect x="192" y="224" width="96" height="20" rx="10" fill="#4f8aff"/>
+  <!-- Carb bar (yellow) -->
+  <rect x="192" y="254" width="128" height="20" rx="10" fill="#2e3352"/>
+  <rect x="192" y="254" width="110" height="20" rx="10" fill="#f59e0b"/>
+  <!-- Fat bar (orange) -->
+  <rect x="192" y="284" width="128" height="20" rx="10" fill="#2e3352"/>
+  <rect x="192" y="284" width="60" height="20" rx="10" fill="#f97316"/>
+  <!-- Knife right -->
+  <rect x="356" y="160" width="8" height="160" rx="4" fill="#8b90a7"/>
+  <ellipse cx="360" cy="185" rx="10" ry="30" fill="#8b90a7"/>
+  <!-- Calorie label -->
+  <text x="256" y="200" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="700" fill="#22c55e">2,800</text>
+  <text x="256" y="222" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#8b90a7">קל'</text>
+</svg>
