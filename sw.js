@@ -3,12 +3,14 @@
  * Cache-first strategy for full offline support
  */
 
-const CACHE_NAME = 'eran-nutrition-v1';
+const CACHE_NAME = 'eran-nutrition-v2';
 const ASSETS = [
   './eran-nutrition-tracker.html',
   './manifest.json',
   './sw.js',
   './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 // ── Install: cache all static assets ──────────────────────────────────────

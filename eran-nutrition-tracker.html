@@ -131,8 +131,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .cat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:4px 10px;font-size:.72rem;color:var(--muted);cursor:pointer;white-space:nowrap;}
 .cat-chip.active{background:rgba(79,138,255,.15);border-color:var(--accent);color:var(--accent);}
 .prod-table{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.pt-hdr{display:grid;grid-template-columns:2fr .8fr .6fr .6fr .6fr .6fr;padding:8px 10px;background:var(--bg3);font-size:.68rem;color:var(--muted);border-bottom:1px solid var(--border);}
-.pt-row{display:grid;grid-template-columns:2fr .8fr .6fr .6fr .6fr .6fr;padding:8px 10px;font-size:.74rem;border-bottom:1px solid rgba(46,51,82,.4);cursor:pointer;transition:background .15s;}
+.pt-hdr{display:grid;grid-template-columns:2fr .7fr .55fr .55fr .55fr .55fr .55fr;padding:8px 10px;background:var(--bg3);font-size:.68rem;color:var(--muted);border-bottom:1px solid var(--border);}
+.pt-row{display:grid;grid-template-columns:2fr .7fr .55fr .55fr .55fr .55fr .55fr;padding:8px 10px;font-size:.74rem;border-bottom:1px solid rgba(46,51,82,.4);cursor:pointer;transition:background .15s;}
+.pt-def{cursor:pointer;color:var(--green);font-weight:600;}
+.pt-def:hover{text-decoration:underline;}
 .pt-row:last-child{border-bottom:none;}
 .pt-row:hover{background:rgba(79,138,255,.07);}
 .pt-cat-header{padding:6px 10px;font-size:.68rem;color:var(--accent);font-weight:600;background:rgba(79,138,255,.05);border-bottom:1px solid var(--border);}
@@ -248,6 +250,28 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   .qinp{min-height:44px;width:80px;}
 }
 
+/* ═══ VOICE + AI CONFIRM ═══════════════════════════════════════════════════ */
+.voice-row{display:flex;gap:8px;align-items:stretch;margin-bottom:8px;}
+.voice-row .search-wrap{flex:1;margin-bottom:0;}
+.mic-btn{flex:0 0 auto;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer;min-height:44px;white-space:nowrap;transition:border-color .2s,background .2s;}
+.mic-btn:hover{border-color:var(--accent);}
+.mic-btn.recording{border-color:var(--red);background:rgba(239,68,68,.12);color:var(--red);}
+.mic-btn .rec-dot{display:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:6px;animation:recPulse 1s ease-in-out infinite;}
+.mic-btn.recording .rec-dot{display:inline-block;}
+@keyframes recPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.voice-fallback{display:none;margin-bottom:8px;}
+.voice-fallback.open{display:block;}
+.voice-fallback .inp{margin-bottom:6px;}
+.voice-status{font-size:.72rem;color:var(--muted);min-height:18px;margin-bottom:6px;}
+.ai-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+.ai-overlay.open{display:flex;}
+.ai-modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;}
+.ai-modal h4{font-size:.9rem;margin-bottom:10px;}
+.ai-modal .ai-list{font-size:.82rem;line-height:1.7;margin-bottom:12px;color:var(--text);}
+.ai-modal .ai-actions{display:flex;gap:8px;}
+.ai-modal .ai-actions .btn{flex:1;margin:0;}
+.ai-loading{color:var(--muted);font-size:.8rem;text-align:center;padding:12px;}
+
 /* ═══ SAFE AREA — header sticky ════════════════════════════════════════════ */
 @supports(padding-top:env(safe-area-inset-top)){
   .header{padding-top:calc(12px + env(safe-area-inset-top));}
@@ -309,10 +333,19 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="card">
     <h3>➕ הוסף מנה</h3>
     <input class="inp" id="mealName" placeholder="שם הארוחה (בוקר, צהריים…)" />
-    <div class="search-wrap">
-      <span class="sicon">🔍</span>
-      <input class="sinp" id="pSearch" placeholder="חפש מוצר…" oninput="onSearch()" onfocus="onSearch()" autocomplete="off"/>
+    <div class="voice-row">
+      <div class="search-wrap">
+        <span class="sicon">🔍</span>
+        <input class="sinp" id="pSearch" placeholder="חפש מוצר…" oninput="onSearch()" onfocus="onSearch()" autocomplete="off"/>
+      </div>
+      <button type="button" class="mic-btn" id="micBtn" title="החזק להקלטה">🎙️ הקלט<span class="rec-dot"></span></button>
     </div>
+    <div class="voice-fallback" id="voiceFallback">
+      <div class="voice-status" id="voiceStatus">הדפדפן לא תומך בזיהוי קול — הקלד מה אכלת:</div>
+      <input class="inp" id="voiceText" placeholder="לדוגמה: שתי ביצים וגבינה לבנה"/>
+      <button type="button" class="btn btn-primary" onclick="submitVoiceText()">שלח לניתוח AI</button>
+    </div>
+    <div class="voice-status" id="voiceRecStatus"></div>
     <div class="drop" id="pDrop"></div>
     <div id="selInfo" style="display:none" class="sel-prod">
       <div class="sn" id="selName"></div>
@@ -384,7 +417,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="form-grid">
         <div class="form-group form-full"><label>שם המוצר</label><input id="pName" placeholder="לחם מחמצת…"/></div>
         <div class="form-group form-full"><label>קטגוריה</label><select id="pCat"></select></div>
-        <div class="form-group"><label>יחידה (גרם)</label><input type="number" id="pUnit" placeholder="100" value="100"/></div>
+        <div class="form-group"><label>יחידה (גרם)</label><input type="number" id="pUnit" placeholder="100" value="100" oninput="syncDefaultGramsFromUnit()"/></div>
+        <div class="form-group"><label>מנה ברירת מחדל (גרם)</label><input type="number" id="pDefaultGrams" placeholder="כמו יחידה" step="1" min="1" oninput="onDefaultGramsInput()"/></div>
         <div class="form-group"><label>חלבון (ל-100g)</label><input type="number" id="pProt" step="0.1" placeholder="0"/></div>
         <div class="form-group"><label>פחמימות (ל-100g)</label><input type="number" id="pCarb" step="0.1" placeholder="0"/></div>
         <div class="form-group"><label>שומן (ל-100g)</label><input type="number" id="pFat" step="0.1" placeholder="0"/></div>
@@ -401,7 +435,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <input class="inp" id="prodSearch" placeholder="חפש מוצר…" oninput="renderProdsTable()"/>
     <div class="cat-filter" id="catFilter"></div>
     <div class="prod-table" id="prodTable">
-      <div class="pt-hdr"><div>מוצר</div><div>יחידה</div><div style="color:var(--protein)">חלבון</div><div style="color:var(--carbs)">פחמ'</div><div style="color:var(--fat)">שומן</div><div style="color:var(--cal)">קל'</div></div>
+      <div class="pt-hdr"><div>מוצר</div><div>יחידה</div><div style="color:var(--green)">מנה</div><div style="color:var(--protein)">חלבון</div><div style="color:var(--carbs)">פחמ'</div><div style="color:var(--fat)">שומן</div><div style="color:var(--cal)">קל'</div></div>
       <div id="prodBody"></div>
     </div>
   </div>
@@ -433,6 +467,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="srow"><div class="slabel">חלבון (g)</div><input type="number" class="sinput-sm" id="sSpP" value="160"/></div>
     <div class="srow"><div class="slabel">פחמימות (g)</div><input type="number" class="sinput-sm" id="sSpC" value="400"/></div>
     <div class="srow"><div class="slabel">שומן (g)</div><input type="number" class="sinput-sm" id="sSpF" value="85"/></div>
+  </div>
+  <div class="card">
+    <h3>🤖 Gemini AI (קול / תמונה)</h3>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">מפתח API מ-<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--accent)">Google AI Studio</a> (חינמי):</div>
+    <input type="password" class="url-input" id="geminiKey" placeholder="AIza…" autocomplete="off"/>
   </div>
   <div class="card">
     <h3>🔄 סנכרון Google Sheets</h3>
@@ -493,13 +532,24 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </button>
 </nav>
 
+<div class="ai-overlay" id="aiConfirmOverlay" onclick="if(event.target===this)closeAiConfirm()">
+  <div class="ai-modal" role="dialog" aria-labelledby="aiConfirmTitle">
+    <h4 id="aiConfirmTitle">זיהוי ארוחה</h4>
+    <div id="aiConfirmBody" class="ai-list"></div>
+    <div class="ai-actions">
+      <button type="button" class="btn btn-primary" style="background:var(--green);border:none" onclick="confirmAiMeal()">✅ נכון — הוסף לסל</button>
+      <button type="button" class="btn btn-ghost" onclick="closeAiConfirm()">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ═══ PRODUCT CATEGORIES ══════════════════════════════════════════════════════
 const CATS=['בשר, עוף ודגים','מוצרי חלב','דגנים ולחם','קטניות','ירקות','פירות','שמנים ואגוזים','ממרחים ורטבים','שתייה','מנות מוכנות','חטיפים ומתוקים'];
 
-// ═══ BASE PRODUCTS ═══════════════════════════════════════════════════════════
+// ═══ BASE PRODUCTS (defaultGrams: מנה אישית — ברירת מחדל = unit, ניתן לדריסה ב-S.portionOverrides) ═══
 const BASE_PRODUCTS=[
 // בשר, עוף ודגים
 {name:'ביצה',cat:'בשר, עוף ודגים',unit:50,p:13,f:11,c:1,kcal:155},
@@ -667,21 +717,82 @@ const BASE_PRODUCTS=[
 ];
 
 // ═══ STATE ═══════════════════════════════════════════════════════════════════
-let S={dayType:'training',meals:{},dayTypes:{},weight:78,weightLog:[],targets:{training:{cal:2800,p:160,c:349,f:85},rest:{cal:2300,p:165,c:212,f:88},sport:{cal:3000,p:160,c:400,f:85}},customProducts:[],sheetsUrl:''};
+const S_DEFAULT={dayType:'training',meals:{},dayTypes:{},weight:78,weightLog:[],targets:{training:{cal:2800,p:160,c:349,f:85},rest:{cal:2300,p:165,c:212,f:88},sport:{cal:3000,p:160,c:400,f:85}},customProducts:[],portionOverrides:{},sheetsUrl:'',geminiKey:''};
+let S=JSON.parse(JSON.stringify(S_DEFAULT));
 let SEL=null;
 let BASKET=[];
 
-function load(){try{const s=localStorage.getItem('eran-v2');if(s)S=JSON.parse(s);}catch(e){}}
+function mergeState(def,saved){
+  const out={
+    dayType:saved.dayType??def.dayType,
+    meals:saved.meals&&typeof saved.meals==='object'?saved.meals:def.meals,
+    dayTypes:saved.dayTypes&&typeof saved.dayTypes==='object'?{...def.dayTypes,...saved.dayTypes}:def.dayTypes,
+    weight:typeof saved.weight==='number'?saved.weight:def.weight,
+    weightLog:Array.isArray(saved.weightLog)?saved.weightLog:def.weightLog,
+    targets:{
+      training:{...def.targets.training,...(saved.targets?.training||{})},
+      rest:{...def.targets.rest,...(saved.targets?.rest||{})},
+      sport:{...def.targets.sport,...(saved.targets?.sport||{})}
+    },
+    customProducts:Array.isArray(saved.customProducts)?saved.customProducts:def.customProducts,
+    portionOverrides:saved.portionOverrides&&typeof saved.portionOverrides==='object'?{...def.portionOverrides,...saved.portionOverrides}:def.portionOverrides,
+    sheetsUrl:typeof saved.sheetsUrl==='string'?saved.sheetsUrl:def.sheetsUrl,
+    geminiKey:typeof saved.geminiKey==='string'?saved.geminiKey:def.geminiKey
+  };
+  Object.keys(saved).forEach(k=>{if(!(k in out))out[k]=saved[k];});
+  return out;
+}
+function load(){try{const s=localStorage.getItem('eran-v2');if(s)S=mergeState(S_DEFAULT,JSON.parse(s));}catch(e){}}
 function save(){localStorage.setItem('eran-v2',JSON.stringify(S));}
 
 // ═══ PRODUCTS ════════════════════════════════════════════════════════════════
+function getDefaultGrams(p){
+  const unit=+p.unit||100;
+  return+(S.portionOverrides?.[p.name]??p.defaultGrams??unit)||unit;
+}
+function gramsToServingQty(p,grams){
+  const unit=+p.unit||100;
+  return Math.max(0.1,grams/unit);
+}
+function servingQtyFromMultiplier(p,multiplier){
+  return gramsToServingQty(p,getDefaultGrams(p)*(parseFloat(multiplier)||1));
+}
 function allProducts(){
   const baseNames=new Set(BASE_PRODUCTS.map(p=>p.name));
   const custom=(S.customProducts||[]).filter(p=>!baseNames.has(p.name));
   return [...BASE_PRODUCTS,...custom].map(p=>{
-    const f=p.unit/100;
-    return{...p,pU:+(p.p*f).toFixed(2),fU:+(p.f*f).toFixed(2),cU:+(p.c*f).toFixed(2),kcalU:+(p.kcal*f).toFixed(1)};
+    const unit=+p.unit||100;
+    const defaultGrams=getDefaultGrams(p);
+    const f=unit/100;
+    return{...p,unit,defaultGrams,pU:+(p.p*f).toFixed(2),fU:+(p.f*f).toFixed(2),cU:+(p.c*f).toFixed(2),kcalU:+(p.kcal*f).toFixed(1),
+      defaultKcalU:+(p.kcal*(defaultGrams/100)).toFixed(1)};
   });
+}
+function setDefaultGrams(name,grams){
+  const g=parseFloat(grams);
+  if(!g||g<=0){toast('⚠️ ערך גרמים לא תקין');return;}
+  const baseNames=new Set(BASE_PRODUCTS.map(p=>p.name));
+  if(baseNames.has(name)){
+    if(!S.portionOverrides)S.portionOverrides={};
+    S.portionOverrides[name]=g;
+  }else{
+    const cp=(S.customProducts||[]).find(p=>p.name===name);
+    if(cp)cp.defaultGrams=g;
+    else{toast('⚠️ מוצר לא נמצא');return;}
+  }
+  save();
+  renderProdsTable();
+  toast(`✅ מנה ברירת מחדל: ${name} → ${g}g`);
+}
+function editDefaultGrams(name,current){
+  const v=prompt(`מנה ברירת מחדל (גרם) — ${name}:`,String(current));
+  if(v===null)return;
+  setDefaultGrams(name,v);
+}
+function prodTableRow(p){
+  const esc=p.name.replace(/'/g,"\\'");
+  const dg=p.defaultGrams;
+  return`<div class="pt-row" onclick="quickSel('${esc}')"><div>${p.name}</div><div style="color:var(--muted)">${p.unit}g</div><div class="pt-def" onclick="event.stopPropagation();editDefaultGrams('${esc}',${dg})" title="לחץ לעריכה">${dg}g</div><div style="color:var(--protein)">${p.pU}g</div><div style="color:var(--carbs)">${p.cU}g</div><div style="color:var(--fat)">${p.fU}g</div><div style="color:var(--cal)">${p.kcalU}</div></div>`;
 }
 
 // ═══ DATE UTILS ══════════════════════════════════════════════════════════════
@@ -761,6 +872,17 @@ function updatePreview(){
 }
 
 // ═══ BASKET LOGIC ════════════════════════════════════════════════════════════
+function addProductToBasket(name,qty){
+  const p=allProducts().find(x=>x.name===name);
+  if(!p)return false;
+  const q=parseFloat(qty)||1;
+  BASKET.push({
+    productName:p.name,qty:q,unit:p.unit,
+    p:+(p.pU*q).toFixed(2),c:+(p.cU*q).toFixed(2),
+    f:+(p.fU*q).toFixed(2),kcal:+(p.kcalU*q).toFixed(1)
+  });
+  return true;
+}
 function addToBasket(){
   if(!SEL)return;
   const q=parseFloat(document.getElementById('qty').value)||1;
@@ -913,7 +1035,7 @@ function renderWeek(){
     <div class="ws-cell"><div class="ws-val" style="color:var(--cal)">${weekCal.toFixed(0)}</div><div class="ws-label">קל' אכלתי</div></div>
     <div class="ws-cell"><div class="ws-val" style="color:var(--muted)">${weekTgt}</div><div class="ws-label">יעד שבועי</div></div>
     <div class="ws-cell"><div class="ws-val" style="color:var(--protein)">${weekP.toFixed(0)}g</div><div class="ws-label">חלבון</div></div>
-    <div class="ws-cell"><div class="ws-val" style="color:${trackedDays} days tracked? 'var(--text)':'var(--muted)'}">${trackedDays}/7</div><div class="ws-label">ימים מעוקבים</div></div>
+    <div class="ws-cell"><div class="ws-val" style="color:${trackedDays? 'var(--text)':'var(--muted)'}">${trackedDays}/7</div><div class="ws-label">ימים מעוקבים</div></div>
   `;
   document.getElementById('weekDays').innerHTML=daysHtml;
   const balChip=weekBal>300?'bc-under':weekBal<-300?'bc-over':'bc-zero';
@@ -982,11 +1104,11 @@ function renderProdsTable(){
 
   let html='';
   if(activeCat!=='הכל'||q){
-    html=prods.map(p=>`<div class="pt-row" onclick="quickSel('${p.name.replace(/'/g,"\\'")}')"><div>${p.name}</div><div style="color:var(--muted)">${p.unit}g</div><div style="color:var(--protein)">${p.pU}g</div><div style="color:var(--carbs)">${p.cU}g</div><div style="color:var(--fat)">${p.fU}g</div><div style="color:var(--cal)">${p.kcalU}</div></div>`).join('');
+    html=prods.map(p=>prodTableRow(p)).join('');
   }else{
     Object.entries(groups).forEach(([cat,items])=>{
       html+=`<div class="pt-cat-header">${cat}</div>`;
-      html+=items.map(p=>`<div class="pt-row" onclick="quickSel('${p.name.replace(/'/g,"\\'")}')"><div>${p.name}</div><div style="color:var(--muted)">${p.unit}g</div><div style="color:var(--protein)">${p.pU}g</div><div style="color:var(--carbs)">${p.cU}g</div><div style="color:var(--fat)">${p.fU}g</div><div style="color:var(--cal)">${p.kcalU}</div></div>`).join('');
+      html+=items.map(p=>prodTableRow(p)).join('');
     });
   }
   document.getElementById('prodBody').innerHTML=html||'<div class="empty">לא נמצאו מוצרים</div>';
@@ -1006,6 +1128,17 @@ function initCatSelect(){
 function toggleAddForm(){
   const f=document.getElementById('addProdForm');
   f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block')syncDefaultGramsFromUnit();
+}
+function syncDefaultGramsFromUnit(){
+  const u=document.getElementById('pUnit');
+  const d=document.getElementById('pDefaultGrams');
+  if(!u||!d)return;
+  if(!d.value||d.dataset.touched!=='1')d.value=u.value||100;
+}
+function onDefaultGramsInput(){
+  const d=document.getElementById('pDefaultGrams');
+  if(d)d.dataset.touched='1';
 }
 function verifyKcal(){
   const p=parseFloat(document.getElementById('pProt').value)||0;
@@ -1026,7 +1159,9 @@ async function saveProduct(){
   const c=parseFloat(document.getElementById('pCarb').value)||0;
   const f=parseFloat(document.getElementById('pFat').value)||0;
   const kcal=parseFloat(document.getElementById('pKcal').value)||Math.round(p*4+c*4+f*9);
-  const prod={name,cat:document.getElementById('pCat').value,unit:parseFloat(document.getElementById('pUnit').value)||100,p,c,f,kcal};
+  const unit=parseFloat(document.getElementById('pUnit').value)||100;
+  const defaultGrams=parseFloat(document.getElementById('pDefaultGrams').value)||unit;
+  const prod={name,cat:document.getElementById('pCat').value,unit,defaultGrams,p,c,f,kcal};
   if(!S.customProducts)S.customProducts=[];
   S.customProducts=S.customProducts.filter(x=>x.name!==name);
   S.customProducts.push(prod);
@@ -1043,6 +1178,8 @@ async function saveProduct(){
   // Reset form
   ['pName','pProt','pCarb','pFat','pKcal'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pUnit').value='100';
+  const dg=document.getElementById('pDefaultGrams');
+  if(dg){dg.value='100';dg.dataset.touched='';}
   document.getElementById('kcalHint').textContent='';
   document.getElementById('addProdForm').style.display='none';
 }
@@ -1056,19 +1193,201 @@ async function fetchFromSheets(){
     const r=await fetch(url);
     const data=await r.json();
     if(!Array.isArray(data)){document.getElementById('syncStatus').textContent='❌ תגובה לא תקינה מגוגל שיטס';return;}
-    let added=0;
+    let added=0,portions=0;
     const baseNames=new Set(BASE_PRODUCTS.map(p=>p.name));
     if(!S.customProducts)S.customProducts=[];
-    const customNames=new Set(S.customProducts.map(p=>p.name));
+    if(!S.portionOverrides)S.portionOverrides={};
+    const customByName=new Map(S.customProducts.map(p=>[p.name,p]));
     data.forEach(p=>{
-      if(!baseNames.has(p.name)&&!customNames.has(p.name)){
-        S.customProducts.push({name:p.name,cat:p.cat||'אחר',unit:+p.unit||100,p:+p.p||0,c:+p.c||0,f:+p.f||0,kcal:+p.kcal||0});
+      if(!p.name)return;
+      const unit=+p.unit||100;
+      const defaultGrams=+p.defaultGrams||unit;
+      if(baseNames.has(p.name)){
+        S.portionOverrides[p.name]=defaultGrams;
+        portions++;
+      }else if(customByName.has(p.name)){
+        const c=customByName.get(p.name);
+        Object.assign(c,{unit,defaultGrams,cat:p.cat||c.cat,p:+p.p||0,c:+p.c||0,f:+p.f||0,kcal:+p.kcal||0});
+        portions++;
+      }else{
+        const row={name:p.name,cat:p.cat||'אחר',unit,defaultGrams,p:+p.p||0,c:+p.c||0,f:+p.f||0,kcal:+p.kcal||0};
+        S.customProducts.push(row);
+        customByName.set(p.name,row);
         added++;
       }
     });
     save();renderProdsTable();
-    document.getElementById('syncStatus').textContent=`✅ ${data.length} מוצרים טעינה | ${added} חדשים נוספו`;
+    document.getElementById('syncStatus').textContent=`✅ ${data.length} מוצרים | ${added} חדשים | ${portions} מנות עודכנו`;
   }catch(e){document.getElementById('syncStatus').textContent='❌ שגיאה: '+e.message;}
+}
+
+// ═══ VOICE + GEMINI AI (Phase 3.5: defaultGrams + multiplier) ═══════════════
+const VISION_GRAMS_MISMATCH_THRESHOLD=0.4; // Prompt #4: needsConfirmation if |est-default|/default > this
+const GEMINI_MODEL='gemini-2.0-flash-exp';
+const GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+let _speechRec=null;
+let _voiceListening=false;
+let _aiPendingItems=[];
+
+function getSpeechRecognition(){
+  return window.SpeechRecognition||window.webkitSpeechRecognition||null;
+}
+function geminiProductCatalog(){
+  return allProducts().map(p=>({name:p.name,cat:p.cat||'',defaultGrams:p.defaultGrams,unit:p.unit}));
+}
+function parseGeminiJsonArray(text){
+  if(!text)return null;
+  let s=String(text).trim();
+  s=s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/i,'');
+  const start=s.indexOf('[');
+  const end=s.lastIndexOf(']');
+  if(start<0||end<=start)return null;
+  try{return JSON.parse(s.slice(start,end+1));}catch(e){return null;}
+}
+function resolveVoiceItems(raw){
+  const byName=new Map(allProducts().map(p=>[p.name,p]));
+  if(!Array.isArray(raw))return[];
+  return raw
+    .filter(x=>x&&typeof x.name==='string'&&byName.has(x.name))
+    .map(x=>{
+      const p=byName.get(x.name);
+      const mult=Math.max(0.1,parseFloat(x.multiplier)??parseFloat(x.qty)??1);
+      const dg=p.defaultGrams;
+      const grams=dg*mult;
+      const servingQty=servingQtyFromMultiplier(p,mult);
+      return{name:x.name,multiplier:mult,defaultGrams:dg,grams,servingQty};
+    });
+}
+async function callGeminiMealParse(transcript){
+  const key=(S.geminiKey||'').trim();
+  if(!key)throw new Error('חסר מפתח Gemini — הוסף בהגדרות');
+  const products=JSON.stringify(geminiProductCatalog());
+  const prompt=`המשתמש אמר: ${JSON.stringify(transcript)}
+מסד מוצרים זמין (JSON, כולל defaultGrams לכל מוצר): ${products}
+החזר JSON בלבד — רשימת פריטים שזוהו:
+[{"name": "...", "multiplier": 1}, ...]
+כללים:
+- name חייב להיות שם מדויק מהרשימה. אל תמציא מוצרים.
+- אל תנחש משקלים בגרמים. השתמש רק ב-multiplier (מכפיל מנה).
+- multiplier = כמה מנות defaultGrams (למשל "שתי ביצים" → multiplier: 2, "חצי מנה" → 0.5).
+- אם לא ברור הכמות, השתמש ב-multiplier: 1.`;
+  const res=await fetch(`${GEMINI_URL}?key=${encodeURIComponent(key)}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg=data?.error?.message||res.statusText||'שגיאת שרת';
+    if(res.status===429)throw new Error('מכסת Gemini מלאה — נסה שוב מאוחר יותר');
+    if(res.status===400)throw new Error('בקשה לא תקינה: '+msg);
+    throw new Error(msg);
+  }
+  const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')||'';
+  const parsed=parseGeminiJsonArray(text);
+  if(!parsed)throw new Error('לא הצלחתי לפענח את תשובת ה-AI');
+  const items=resolveVoiceItems(parsed);
+  if(!items.length)throw new Error('לא זוהו מוצרים מהמסד — נסה לנסח אחרת');
+  return items;
+}
+function showAiConfirm(items){
+  _aiPendingItems=items;
+  const summary=items.map(i=>`${i.name} ×${i.multiplier} (${i.grams.toFixed(0)}g, מנה ${i.defaultGrams}g)`).join('<br>');
+  document.getElementById('aiConfirmBody').innerHTML=`<p>זיהיתי:</p><p><strong>${summary}</strong></p><p style="color:var(--muted);font-size:.75rem;margin-top:8px">לאשר ולהוסיף לסל?</p>`;
+  document.getElementById('aiConfirmOverlay').classList.add('open');
+}
+function closeAiConfirm(){
+  document.getElementById('aiConfirmOverlay').classList.remove('open');
+  _aiPendingItems=[];
+}
+function confirmAiMeal(){
+  if(!_aiPendingItems.length){closeAiConfirm();return;}
+  let added=0;
+  _aiPendingItems.forEach(i=>{if(addProductToBasket(i.name,i.servingQty))added++;});
+  closeAiConfirm();
+  if(added)renderBasket();
+  toast(added?`✅ ${added} מוצרים נוספו לסל`:'⚠️ לא נוסף כלום לסל');
+}
+async function processMealTranscript(transcript){
+  const t=(transcript||'').trim();
+  if(!t){toast('⚠️ לא התקבל טקסט');return;}
+  const overlay=document.getElementById('aiConfirmOverlay');
+  overlay.classList.add('open');
+  document.getElementById('aiConfirmBody').innerHTML='<div class="ai-loading">⏳ מנתח עם Gemini…</div>';
+  try{
+    const items=await callGeminiMealParse(t);
+    showAiConfirm(items);
+  }catch(e){
+    closeAiConfirm();
+    toast('❌ '+e.message);
+  }
+}
+function setMicRecording(on){
+  const btn=document.getElementById('micBtn');
+  if(!btn)return;
+  btn.classList.toggle('recording',on);
+  _voiceListening=on;
+  const st=document.getElementById('voiceRecStatus');
+  if(st)st.textContent=on?'🔴 מקליט… שחרר לסיום':'';
+}
+function stopVoice(){
+  if(_speechRec&&_voiceListening){
+    try{_speechRec.stop();}catch(e){}
+  }
+  setMicRecording(false);
+}
+function startVoice(){
+  if(!getSpeechRecognition()){
+    document.getElementById('voiceFallback').classList.add('open');
+    return;
+  }
+  if(_voiceListening){stopVoice();return;}
+  if(!_speechRec){
+    _speechRec=new(getSpeechRecognition())();
+    _speechRec.lang='he-IL';
+    _speechRec.interimResults=false;
+    _speechRec.maxAlternatives=1;
+    _speechRec.onresult=e=>{
+      const t=e.results?.[0]?.[0]?.transcript||'';
+      setMicRecording(false);
+      if(t)processMealTranscript(t);
+    };
+    _speechRec.onerror=e=>{
+      setMicRecording(false);
+      const err=e.error==='not-allowed'?'נדרשת הרשאת מיקרופון':e.error==='no-speech'?'לא זוהה דיבור — נסה שוב':'שגיאת הקלטה';
+      toast('⚠️ '+err);
+    };
+    _speechRec.onend=()=>setMicRecording(false);
+  }
+  try{
+    _speechRec.start();
+    setMicRecording(true);
+  }catch(e){
+    setMicRecording(false);
+    toast('⚠️ לא ניתן להתחיל הקלטה');
+  }
+}
+function submitVoiceText(){
+  const t=document.getElementById('voiceText').value;
+  processMealTranscript(t);
+}
+function initVoiceUI(){
+  const SR=getSpeechRecognition();
+  const mic=document.getElementById('micBtn');
+  const fb=document.getElementById('voiceFallback');
+  if(!SR){
+    if(mic)mic.style.display='none';
+    if(fb)fb.classList.add('open');
+    return;
+  }
+  if(mic){
+    mic.addEventListener('mousedown',e=>{e.preventDefault();startVoice();});
+    mic.addEventListener('mouseup',stopVoice);
+    mic.addEventListener('mouseleave',()=>{if(_voiceListening)stopVoice();});
+    mic.addEventListener('touchstart',e=>{e.preventDefault();startVoice();},{passive:false});
+    mic.addEventListener('touchend',e=>{e.preventDefault();stopVoice();});
+    mic.addEventListener('click',e=>e.preventDefault());
+  }
 }
 
 // ═══ SETTINGS ════════════════════════════════════════════════════════════════
@@ -1087,6 +1406,7 @@ function loadSettingsUI(){
   document.getElementById('sSpC').value=S.targets.sport.c;
   document.getElementById('sSpF').value=S.targets.sport.f;
   if(S.sheetsUrl)document.getElementById('sheetsUrl').value=S.sheetsUrl;
+  document.getElementById('geminiKey').value=S.geminiKey||'';
 }
 function saveSettings(){
   S.weight=parseFloat(document.getElementById('sWeight').value)||78;
@@ -1094,6 +1414,7 @@ function saveSettings(){
   S.targets.rest={cal:+document.getElementById('sReCal').value,p:+document.getElementById('sReP').value,c:+document.getElementById('sReC').value,f:+document.getElementById('sReF').value};
   S.targets.sport={cal:+document.getElementById('sSpCal').value,p:+document.getElementById('sSpP').value,c:+document.getElementById('sSpC').value,f:+document.getElementById('sSpF').value};
   S.sheetsUrl=document.getElementById('sheetsUrl').value.trim();
+  S.geminiKey=document.getElementById('geminiKey').value.trim();
   save();
   document.getElementById('wBadge').textContent=`⚖️ ${S.weight} ק"ג`;
   updateMacroUI();
@@ -1129,6 +1450,7 @@ function init(){
   document.getElementById('wDate').value=dk();
   // Set today weight badge from log
   if(S.weightLog&&S.weightLog.length)document.getElementById('wBadge').textContent=`⚖️ ${S.weightLog[0].weight} ק"ג`;
+  initVoiceUI();
 }
 init();
 
