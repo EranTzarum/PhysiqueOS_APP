@@ -2,7 +2,7 @@
   "name": "מעקב תזונה — ערן",
   "short_name": "תזונה",
   "description": "מעקב תזונה יומי חכם עם Calorie Cycling",
-  "start_url": "./eran-nutrition-tracker.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f1117",
   "theme_color": "#1a1d27",
